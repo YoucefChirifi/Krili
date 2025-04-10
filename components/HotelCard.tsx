@@ -1,56 +1,91 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { MapPinIcon, StarIcon } from '@heroicons/react/24/solid';
+
 interface HotelCardProps {
-    id: number;
-    name: string;
-    location: string;
-    stars: number;
-    price: string;
-    image: string;
-  }
-  
-  export default function HotelCard({
-    id,
-    name,
-    location,
-    stars,
-    price,
-    image
-  }: HotelCardProps) {
-    return (
-      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-        {/* Hotel image */}
-        <div className="h-48 bg-blue-100 flex items-center justify-center">
-          <span className="text-gray-500">[Hotel Image]</span>
-        </div>
-        
-        <div className="p-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-xl font-bold text-gray-800">{name}</h3>
-              <p className="text-gray-600">{location}</p>
-            </div>
-            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
-              {price}/night
-            </span>
-          </div>
-  
-          {/* Star rating */}
-          <div className="flex mt-4">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className={`w-5 h-5 ${i < stars ? 'text-yellow-400' : 'text-gray-300'}`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-  
-          <button className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
-            View Details
-          </button>
+  id: number;
+  name: string;
+  location: string;
+  stars: number;
+  price: string;
+  image: string;
+  amenities?: string[];
+}
+
+export default function HotelCard({
+  id,
+  name,
+  location,
+  stars,
+  price,
+  image,
+  amenities = []
+}: HotelCardProps) {
+  return (
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col border border-gray-200">
+      {/* Hotel Image */}
+      <div className="relative h-48 w-full">
+        <Image
+          src={image}
+          alt={`${name} in ${location}`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs font-semibold">
+          {stars} ★
         </div>
       </div>
-    );
-  }
+      
+      {/* Hotel Info */}
+      <div className="p-5 flex-grow flex flex-col">
+        <div className="flex justify-between items-start gap-2">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{name}</h3>
+            <p className="text-gray-600 mt-1 flex items-center">
+              <MapPinIcon className="w-4 h-4 mr-1 text-blue-500" />
+              <span className="text-sm">{location}</span>
+            </p>
+          </div>
+          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-bold whitespace-nowrap">
+            {price} DA
+          </span>
+        </div>
+
+        {/* Star Rating */}
+        <div className="flex mt-3">
+          {[...Array(5)].map((_, i) => (
+            <StarIcon
+              key={i}
+              className={`w-5 h-5 ${i < stars ? 'text-yellow-400 fill-current' : 'text-gray-300 fill-current'}`}
+            />
+          ))}
+        </div>
+
+        {/* Amenities */}
+        {amenities.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="flex flex-wrap gap-2">
+              {amenities.slice(0, 3).map((amenity) => (
+                <span 
+                  key={amenity} 
+                  className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full"
+                >
+                  {amenity}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* View Details Button */}
+        <Link
+          href={`/hotels/${id}`}
+          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-center block text-sm font-medium"
+        >
+          Voir détails
+        </Link>
+      </div>
+    </div>
+  );
+}
