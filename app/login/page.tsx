@@ -1,16 +1,11 @@
-// app/register/page.tsx
+// app/login/page.tsx
 import React from 'react';
 
-export default function RegisterPage() {
+export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <form className="bg-white p-8 rounded shadow-md w-full max-w-md space-y-4">
-        <h2 className="text-2xl font-bold text-center">Create an Account</h2>
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="w-full p-3 border rounded"
-        />
+        <h2 className="text-2xl font-bold text-center">Welcome Back</h2>
         <input
           type="email"
           placeholder="Email"
@@ -25,12 +20,12 @@ export default function RegisterPage() {
           type="submit"
           className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition"
         >
-          Register
+          Login
         </button>
         <p className="text-center text-sm">
-          Already have an account?{' '}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Login
+          Don’t have an account?{' '}
+          <a href="/register" className="text-blue-600 hover:underline">
+            Register
           </a>
         </p>
       </form>
