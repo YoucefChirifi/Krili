@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { FaFacebook, FaInstagram, FaPhone } from "react-icons/fa";
 
+
 export default function Footer() {
   return (
     <footer className="bg-grey border-t border-gray-200 py-8 mt-12">

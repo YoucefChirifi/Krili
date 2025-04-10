@@ -3,6 +3,16 @@
 import Link from "next/link";
 import { FaStar, FaUserCircle } from "react-icons/fa";
 import { useState } from "react";
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+
 
 export default function Navbar() {
   const [hoveredStar, setHoveredStar] = useState(0);
@@ -16,7 +26,21 @@ export default function Navbar() {
         <div className="text-2xl font-bold text-blue-900">
           K<span className="text-blue-600">RILI</span>
         </div>
-      </Link>
+      </Link>      
+       <div className="flex gap-3">
+       <Select>
+  <SelectTrigger className="w-[180px]">
+    <SelectValue placeholder="Theme" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="light">Light</SelectItem>
+    <SelectItem value="dark">Dark</SelectItem>
+    <SelectItem value="system">System</SelectItem>
+  </SelectContent>
+</Select>
+
+       </div>
+
 
       {/* Stars in center */}
       <div className="flex gap-4">
@@ -42,12 +66,16 @@ export default function Navbar() {
       {/* Account circle with name */}
       <div className="flex items-center gap-3 w-24 justify-end">
         <div className="relative">
+        
           <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold cursor-pointer">
             {userInitials}
           </div>
           {/* You can add a dropdown menu here later */}
+         
         </div>
+        
       </div>
+      
     </nav>
   );
 }
