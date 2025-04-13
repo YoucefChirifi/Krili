@@ -1,7 +1,13 @@
+// components/BookingForm.tsx
 'use client'
 import { useState } from 'react'
-import { CalendarIcon, UserIcon, BedIcon } from 'lucide-react'
+import { Calendar as CalendarIcon, UserIcon, BedIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface BookingFormProps {
   hotelId: number
@@ -10,8 +16,8 @@ interface BookingFormProps {
 
 export default function BookingForm({ hotelId, pricePerNight }: BookingFormProps) {
   const [bookingData, setBookingData] = useState({
-    checkIn: '',
-    checkOut: '',
+    checkIn: undefined as Date | undefined,
+    checkOut: undefined as Date | undefined,
     adults: 1,
     children: 0,
     rooms: 1
@@ -19,7 +25,7 @@ export default function BookingForm({ hotelId, pricePerNight }: BookingFormProps
 
   const calculateTotalNights = () => {
     if (bookingData.checkIn && bookingData.checkOut) {
-      const diffTime = new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()
+      const diffTime = bookingData.checkOut.getTime() - bookingData.checkIn.getTime()
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     }
     return 0
@@ -30,7 +36,6 @@ export default function BookingForm({ hotelId, pricePerNight }: BookingFormProps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically connect to your booking API
     console.log('Booking data:', {
       hotelId,
       ...bookingData,
@@ -41,109 +46,147 @@ export default function BookingForm({ hotelId, pricePerNight }: BookingFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md">
+    <form 
+      onSubmit={handleSubmit} 
+      className="space-y-4 bg-white p-6 rounded-lg shadow-md sticky top-4 h-fit"
+    >
       <h3 className="text-xl font-semibold">Réserver maintenant</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Check-in Date */}
-        <div className="relative">
-          <label className="block text-sm font-medium mb-1">Date darrivée</label>
-          <div className="relative">
-            <input
-              type="date"
-              className="w-full p-2 border rounded-md pl-10"
-              value={bookingData.checkIn}
-              onChange={(e) => setBookingData({...bookingData, checkIn: e.target.value})}
-              min={new Date().toISOString().split('T')[0]}
-              required
+      {/* Check-in Date */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Date darrivée</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !bookingData.checkIn && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {bookingData.checkIn ? (
+                format(bookingData.checkIn, "PPP", { locale: fr })
+              ) : (
+                <span>Sélectionner une date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={bookingData.checkIn}
+              onSelect={(date) => setBookingData({...bookingData, checkIn: date})}
+              initialFocus
+              fromDate={new Date()}
+              locale={fr}
             />
-            <CalendarIcon className="absolute left-3 top-9 h-4 w-4 text-gray-400" />
-          </div>
-        </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
-        {/* Check-out Date */}
-        <div className="relative">
-          <label className="block text-sm font-medium mb-1">Date de départ</label>
-          <div className="relative">
-            <input
-              type="date"
-              className="w-full p-2 border rounded-md pl-10"
-              value={bookingData.checkOut}
-              onChange={(e) => setBookingData({...bookingData, checkOut: e.target.value})}
-              min={bookingData.checkIn || new Date().toISOString().split('T')[0]}
-              required
+      {/* Check-out Date */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Date de départ</label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !bookingData.checkOut && "text-muted-foreground"
+              )}
+              disabled={!bookingData.checkIn}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {bookingData.checkOut ? (
+                format(bookingData.checkOut, "PPP", { locale: fr })
+              ) : (
+                <span>Sélectionner une date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={bookingData.checkOut}
+              onSelect={(date) => setBookingData({...bookingData, checkOut: date})}
+              initialFocus
+              fromDate={bookingData.checkIn ? new Date(bookingData.checkIn.getTime() + 86400000) : new Date()}
+              locale={fr}
             />
-            <CalendarIcon className="absolute left-3 top-9 h-4 w-4 text-gray-400" />
-          </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* Adults */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Adultes</label>
+        <div className="relative">
+          <select
+            className="w-full p-2 border rounded-md pl-10"
+            value={bookingData.adults}
+            onChange={(e) => setBookingData({...bookingData, adults: parseInt(e.target.value)})}
+          >
+            {[1, 2, 3, 4, 5].map(num => (
+              <option key={num} value={num}>{num}</option>
+            ))}
+          </select>
+          <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Adults */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Adultes</label>
-          <div className="relative">
-            <select
-              className="w-full p-2 border rounded-md pl-10"
-              value={bookingData.adults}
-              onChange={(e) => setBookingData({...bookingData, adults: parseInt(e.target.value)})}
-            >
-              {[1, 2, 3, 4, 5].map(num => (
-                <option key={num} value={num}>{num}</option>
-              ))}
-            </select>
-            <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          </div>
+      {/* Children */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Enfants</label>
+        <div className="relative">
+          <select
+            className="w-full p-2 border rounded-md pl-10"
+            value={bookingData.children}
+            onChange={(e) => setBookingData({...bookingData, children: parseInt(e.target.value)})}
+          >
+            {[0, 1, 2, 3, 4].map(num => (
+              <option key={num} value={num}>{num}</option>
+            ))}
+          </select>
+          <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         </div>
+      </div>
 
-        {/* Children */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Enfants</label>
-          <div className="relative">
-            <select
-              className="w-full p-2 border rounded-md pl-10"
-              value={bookingData.children}
-              onChange={(e) => setBookingData({...bookingData, children: parseInt(e.target.value)})}
-            >
-              {[0, 1, 2, 3, 4].map(num => (
-                <option key={num} value={num}>{num}</option>
-              ))}
-            </select>
-            <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          </div>
-        </div>
-
-        {/* Rooms */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Chambres</label>
-          <div className="relative">
-            <select
-              className="w-full p-2 border rounded-md pl-10"
-              value={bookingData.rooms}
-              onChange={(e) => setBookingData({...bookingData, rooms: parseInt(e.target.value)})}
-            >
-              {[1, 2, 3].map(num => (
-                <option key={num} value={num}>{num}</option>
-              ))}
-            </select>
-            <BedIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          </div>
+      {/* Rooms */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Chambres</label>
+        <div className="relative">
+          <select
+            className="w-full p-2 border rounded-md pl-10"
+            value={bookingData.rooms}
+            onChange={(e) => setBookingData({...bookingData, rooms: parseInt(e.target.value)})}
+          >
+            {[1, 2, 3].map(num => (
+              <option key={num} value={num}>{num}</option>
+            ))}
+          </select>
+          <BedIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         </div>
       </div>
 
       {/* Price Summary */}
       {totalNights > 0 && (
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex justify-between mb-1">
-            <span>{pricePerNight.toLocaleString()} DA x {totalNights} nuit(s)</span>
-            <span>{(pricePerNight * totalNights).toLocaleString()} DA</span>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span className="text-sm">Prix/nuit:</span>
+            <span className="text-sm">{pricePerNight.toLocaleString()} DA</span>
           </div>
-          <div className="flex justify-between mb-1">
-            <span>{bookingData.rooms} chambre(s)</span>
-            <span>x{bookingData.rooms}</span>
+          <div className="flex justify-between">
+            <span className="text-sm">Durée:</span>
+            <span className="text-sm">{totalNights} nuit(s)</span>
           </div>
-          <div className="border-t mt-2 pt-2 font-semibold flex justify-between">
-            <span>Total</span>
+          <div className="flex justify-between">
+            <span className="text-sm">Chambres:</span>
+            <span className="text-sm">{bookingData.rooms}</span>
+          </div>
+          <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
+            <span>Total:</span>
             <span>{totalPrice.toLocaleString()} DA</span>
           </div>
         </div>
@@ -152,6 +195,7 @@ export default function BookingForm({ hotelId, pricePerNight }: BookingFormProps
       <Button 
         type="submit" 
         className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-lg mt-4"
+        disabled={!bookingData.checkIn || !bookingData.checkOut}
       >
         Confirmer la réservation
       </Button>

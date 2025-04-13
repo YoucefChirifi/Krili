@@ -1,4 +1,10 @@
-import { MapPinIcon, StarIcon, WifiIcon, ParkingCircleIcon, UtensilsIcon, DumbbellIcon, WavesIcon } from 'lucide-react';
+// pages/hotels/[id].tsx
+'use client'
+import { MapPinIcon, StarIcon, WifiIcon, ParkingCircleIcon, UtensilsIcon, DumbbellIcon, WavesIcon } from 'lucide-react'
+import BookingForm from '@/components/HotelBookingForm'
+import { ImageCarousel } from '@/components/ImageCarousel'
+import { Button } from '@/components/ui/button'
+import { PhoneIcon, HeartIcon } from 'lucide-react'
 
 interface Hotel {
   id: number;
@@ -20,16 +26,21 @@ const hotels: Hotel[] = [
     price: 35000,
     description: "Situé face à la baie d'Alger, cet hôtel luxueux offre une vue imprenable sur la Méditerranée et un service exceptionnel.",
     amenities: ["WiFi", "Parking", "Piscine", "Spa", "Restaurant", "Salle de sport"],
-    images: ["/hotels/algiers/1.jpg", "/hotels/algiers/2.jpg", "/hotels/algiers/3.jpg"]
+    images: [
+      "/hotels/algeria.png",
+      "/hotels/algeria.png",
+      "/hotels/algeria.png",
+      "/hotels/algeria.png"
+    ]
   },
-  // Add other hotels...
-];
+  // Add more hotels as needed
+]
 
 export default function HotelDetailPage({ params }: { params: { id: string } }) {
-  const hotel = hotels.find(h => h.id === Number(params.id));
+  const hotel = hotels.find(h => h.id === Number(params.id))
 
   if (!hotel) {
-    return <div className="container mx-auto px-4 py-8 text-center">Hôtel non trouvé</div>;
+    return <div className="container mx-auto px-4 py-8 text-center">Hôtel non trouvé</div>
   }
 
   return (
@@ -53,48 +64,54 @@ export default function HotelDetailPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      {/* Hotel Gallery */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
-          <img 
-            src={hotel.images[0]} 
-            alt={hotel.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {hotel.images.slice(1, 3).map((image, index) => (
-            <div key={index} className="relative h-32 md:h-48 rounded-xl overflow-hidden">
-              <img 
-                src={image} 
-                alt={`${hotel.name} ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
-          {hotel.images.length > 3 && (
-            <div className="relative h-32 md:h-48 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-500">+{hotel.images.length - 3} photos</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Price Section */}
-      <div className="bg-blue-50 rounded-lg p-4 mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="text-xl font-semibold">À partir de</h3>
-            <p className="text-3xl font-bold text-blue-600">{hotel.price.toLocaleString()} DA</p>
-            <p className="text-gray-500 text-sm">par nuit</p>
+      {/* Hotel Gallery & Booking */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Images with Carousel */}
+        <div className="lg:col-span-2 space-y-4">
+          <ImageCarousel images={hotel.images} hotelName={hotel.name} />
+          
+          {/* Thumbnail Grid */}
+          <div className="grid grid-cols-4 gap-2">
+            {hotel.images.map((image, index) => (
+              <div 
+                key={index} 
+                className="relative aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                <img
+                  src={image}
+                  alt={`${hotel.name} thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
-            Réserver
-          </button>
+        </div>
+
+        {/* Booking Form */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-4">
+            <BookingForm hotelId={hotel.id} pricePerNight={hotel.price} />
+            
+            {/* Additional Booking Options */}
+            <div className="mt-4 space-y-2">
+              <Button variant="outline" className="w-full">
+                <span className="flex items-center justify-center gap-2">
+                  <PhoneIcon className="w-4 h-4" />
+                  Contacter lhôtel
+                </span>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <span className="flex items-center justify-center gap-2">
+                  <HeartIcon className="w-4 h-4" />
+                  Sauvegarder
+                </span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Hotel Description */}
+      {/* Description */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Description</h2>
         <p className="text-gray-700">{hotel.description}</p>
@@ -137,10 +154,39 @@ export default function HotelDetailPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      {/* Location Map Placeholder */}
-      <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
-        <p className="text-gray-500">Carte de localisation</p>
+      {/* Location */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Localisation</h2>
+        <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
+          <p className="text-gray-500">Carte de localisation</p>
+        </div>
+        <div className="mt-4">
+          <Button variant="outline" className="flex items-center gap-2">
+            <MapPinIcon className="w-4 h-4" />
+            <span>Voir sur la carte</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Avis des clients</h2>
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex items-center mb-2">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon 
+                  key={i}
+                  className={`w-4 h-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300 fill-current'}`}
+                />
+              ))}
+            </div>
+            <p className="text-gray-700 italic">Excellent séjour, personnel très accueillant et chambres spacieuses."</p>
+            <p className="text-sm text-gray-500 mt-2">- Ahmed, 15 Mars 2023</p>
+          </div>
+          <Button variant="outline">Voir tous les avis</Button>
+        </div>
       </div>
     </div>
-  );
+  )
 }
